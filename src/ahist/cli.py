@@ -19,9 +19,8 @@ def primary(api, repo_id, dry_run=False):
     """任务 1：拉取两个数据源并推送至 data/primary/。"""
     for source in SOURCES:
         ts = datetime.now(TZ).strftime("%Y%m%d%H%M%S")  # 每个源单独取一次时间
-        fetch_spot(source, f"{source}.csv")
         name = f"stock_zh_a_hist_{source}_{ts}.csv"
-        os.rename(f"{source}.csv", name)
+        fetch_spot(source, name)
         path = f"data/primary/{name}"
         if not dry_run:
             api.upload_file(
