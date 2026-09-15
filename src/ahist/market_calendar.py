@@ -5,7 +5,7 @@ from datetime import datetime, time, timedelta, timezone
 import akshare as ak
 
 # A 股按北京时间交易，固定 UTC+8
-_TZ = timezone(timedelta(hours=8))
+TZ = timezone(timedelta(hours=8))
 
 # A 股 15:00 收盘，只有收盘后拉取到的才是当日收盘价
 _CLOSE = time(15, 0)
@@ -17,7 +17,7 @@ def current_trade_date(now=None):
     :param now: 注入的当前时间（便于测试），默认取北京时间
     :return: datetime.date
     """
-    now = now or datetime.now(_TZ)
+    now = now or datetime.now(TZ)
     # 未到收盘时间，当日还没有收盘价，回退到上一日再取最近交易日
     if now.time() < _CLOSE:
         now -= timedelta(days=1)
