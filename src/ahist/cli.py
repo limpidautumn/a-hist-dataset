@@ -17,11 +17,11 @@ SOURCES = ("tx", "sina")  # 腾讯、新浪
 
 def primary(api, repo_id, dry_run=False):
     """任务 1：拉取两个数据源并推送至 data/primary/。"""
-    ts = datetime.now(TZ).strftime("%Y%m%d%H%M%S")  # 先取时间，两源共用同一时间戳
     for source in SOURCES:
-        fetch_spot(source, f"{source}.csv")  # 再拉取
+        ts = datetime.now(TZ).strftime("%Y%m%d%H%M%S")  # 每个源单独取一次时间
+        fetch_spot(source, f"{source}.csv")
         name = f"stock_zh_a_hist_{source}_{ts}.csv"
-        os.rename(f"{source}.csv", name)  # 最后重命名
+        os.rename(f"{source}.csv", name)
         path = f"data/primary/{name}"
         if not dry_run:
             api.upload_file(
