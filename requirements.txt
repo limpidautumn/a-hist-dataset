@@ -1,0 +1,2 @@
+akshare
+huggingface_hub

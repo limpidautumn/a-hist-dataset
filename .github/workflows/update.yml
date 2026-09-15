@@ -1,0 +1,37 @@
+name: update
+
+# 定时与手动触发均在默认分支（main）上生效
+on:
+  schedule:
+    - cron: "51 17 * * *" # 01:51 UTC+8
+    - cron: "44 23 * * *" # 07:44 UTC+8
+    - cron: "47 7 * * *" # 15:47 UTC+8
+    - cron: "13 11 * * *" # 19:13 UTC+8
+  workflow_dispatch:
+
+env:
+  PYTHONPATH: src
+  HF_REPO_ID: ${{ vars.HF_REPO_ID }}
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+jobs:
+  primary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt
+      - run: python -m ahist.cli primary
+
+  daily:
+    needs: primary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt
+      - run: python -m ahist.cli daily
