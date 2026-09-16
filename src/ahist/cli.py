@@ -14,13 +14,13 @@ from .market_calendar import AFTER_CLOSE, TZ, current_trade_date, session_state
 
 SOURCES = ("tx", "sina")  # 腾讯、新浪
 
-# 单次拉取耗时上界（实测 tx≈25s、sina≈60s），用于判断拉取窗口是否跨过开盘
-SPAN = timedelta(minutes=5)
+# 单次拉取耗时上界，用于判断拉取窗口是否跨过开盘
+SPAN = timedelta(minutes=15)
 
 
 def _start_time(path, prefix):
     """从 primary 文件名解析拉取起始时间。"""
-    return datetime.strptime(path[len(prefix):-4], "%Y%m%d%H%M%S").replace(tzinfo=TZ)
+    return datetime.strptime(path[len(prefix) : -4], "%Y%m%d%H%M%S").replace(tzinfo=TZ)
 
 
 def primary(api, repo_id, dry_run=False):
@@ -32,7 +32,10 @@ def primary(api, repo_id, dry_run=False):
         path = f"data/primary/{name}"
         if not dry_run:
             api.upload_file(
-                path_or_fileobj=name, path_in_repo=path, repo_id=repo_id, repo_type="dataset"
+                path_or_fileobj=name,
+                path_in_repo=path,
+                repo_id=repo_id,
+                repo_type="dataset",
             )
         print(path)
 
