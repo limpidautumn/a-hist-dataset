@@ -5,14 +5,22 @@
 
 import argparse
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from huggingface_hub import CommitOperationCopy, HfApi
 
 from .fetch import fetch_spot
-from .market_calendar import TZ, current_trade_date
+from .market_calendar import AFTER_CLOSE, TZ, current_trade_date, session_state
 
 SOURCES = ("tx", "sina")  # 腾讯、新浪
+
+# 单次拉取耗时上界，用于判断拉取窗口是否跨过开盘
+SPAN = timedelta(minutes=15)
+
+
+def _start_time(path, prefix):
+    """从 primary 文件名解析拉取起始时间。"""
+    return datetime.strptime(path[len(prefix) : -4], "%Y%m%d%H%M%S").replace(tzinfo=TZ)
 
 
 def primary(api, repo_id, dry_run=False):
@@ -24,18 +32,26 @@ def primary(api, repo_id, dry_run=False):
         path = f"data/primary/{name}"
         if not dry_run:
             api.upload_file(
-                path_or_fileobj=name, path_in_repo=path, repo_id=repo_id, repo_type="dataset"
+                path_or_fileobj=name,
+                path_in_repo=path,
+                repo_id=repo_id,
+                repo_type="dataset",
             )
         print(path)
 
 
 def daily(api, repo_id, dry_run=False):
-    """任务 2：把 data/daily/ 链接到最新的 primary 文件（即当前交易日的收盘快照）。"""
+    """任务 2：把 data/daily/ 链接到上个交易日收盘状态的最新 primary 文件。"""
     date = current_trade_date().strftime("%Y%m%d")
     files = api.list_repo_files(repo_id, repo_type="dataset")
     for source in SOURCES:
         prefix = f"data/primary/stock_zh_a_hist_{source}_"
-        latest = max(f for f in files if f.startswith(prefix))
+        latest = max(
+            f
+            for f in files
+            if f.startswith(prefix)
+            and session_state(_start_time(f, prefix), SPAN) == AFTER_CLOSE
+        )
         path = f"data/daily/stock_zh_a_hist_{source}_{date}.csv"
         if not dry_run:
             api.create_commit(
