@@ -25,7 +25,7 @@ def session_state(ts, span=timedelta()):
 @cache
 def _trade_dates():
     """交易日历；缓存复用，避免反复请求。"""
-    return ak.tool_trade_date_hist_sina()["trade_date"]
+    return ak.calendar_trade_date_hist_sina()["trade_date"]
 
 
 def trade_date_state(ts):
