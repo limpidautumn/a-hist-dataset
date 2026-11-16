@@ -7,7 +7,7 @@ import akshare as ak
 # 数据源 -> AKShare 接口：tx=腾讯，sina=新浪
 _FETCHERS = {
     "tx": ak.stock_zh_a_spot_tx,
-    "sina": ak.stock_zh_a_spot,
+    "sina": ak.stock_zh_a_spot_sina,
 }
 
 
